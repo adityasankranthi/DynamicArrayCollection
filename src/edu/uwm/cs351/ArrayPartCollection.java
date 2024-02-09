@@ -1,12 +1,14 @@
 package edu.uwm.cs351;
 
 import java.util.AbstractCollection;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-public class ArrayPartCollection // TODO: extends ... implements ...
+public class ArrayPartCollection implements Robot, Collection<Part>// TODO: extends ... implements ...
+
 { 
 	private static final int DEFAULT_INITIAL_CAPACITY = 1;
 	
@@ -25,7 +27,28 @@ public class ArrayPartCollection // TODO: extends ... implements ...
 	private boolean wellFormed() {
 		//TODO: Complete this.  Simpler than than the same for HW 2
 		// If no problems discovered, return true
+		
+        // 1. The "functions" and "parts" arrays must not be null.
+        if (functions == null) return report("functions array is null");
+        if (parts == null) return report("parts array is null");
+        
+        // 2. The "functions" and "parts" arrays are always the same length.
+        if (functions.length != parts.length) return report("functions and parts are not of equal length");
+        
+        // 3. The size cannot be negative or greater than the length of the arrays.
+        if (size < 0) return report("The size is negative");
+        if (size > functions.length) return report("The size greater than the length of the array");
+        
+        // 4. None of the first “size” elements of either array can be null. (ie. no holes)
+        for (int i = 0; i < size; i++) {
+            if (functions[i] == null || parts[i] == null) {
+                return report("Data at index " + i + " is null");
+            }
+        }
+        
 		return true;
+		
+		
 	}
 	
 	/**
@@ -71,16 +94,166 @@ public class ArrayPartCollection // TODO: extends ... implements ...
 	// Make sure to properly document each.
 	// You are welcome to copy code in from the solution 
 	// to Homework #2, especially if you re-type it yourself!
+	
+	@Override // required
+	public boolean addPart(String arg0, Part arg1) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public Part getPart(String arg0, int arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override // required
+	public Part removePart(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+    @Override // decorate
+    public ArrayPartCollection clone() {
+        assert wellFormed() : "invariant broken in clone";
+        ArrayPartCollection result;
+        try {
+            result = (ArrayPartCollection) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("forgot to implement cloneable?");
+        }
+        result.size = this.size;
+        result.version = this.version;
+        result.functions = new String[result.size];
+        result.parts = new Part[result.size];
+        for (int i = 0; i< this.size; i++) {
+            result.functions[i] = this.functions[i];
+            result.parts[i] = this.parts[i];
+        }
+        assert result.wellFormed() : "invariant broken in result of clone";
+        assert wellFormed() : "invariant broken by clone";
+        return result;
+    }
+	public Iterator<Part> iterator(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override // required
+	public boolean isEmpty() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public boolean contains(Object o) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public Iterator<Part> iterator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override // required
+	public Object[] toArray() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override // required
+	public <T> T[] toArray(T[] a) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override // required
+	public boolean add(Part e) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public boolean remove(Object o) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public boolean containsAll(Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public boolean addAll(Collection<? extends Part> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public boolean removeAll(Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public boolean retainAll(Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override // required
+	public void clear() {
+		// TODO Auto-generated method stub
 		
-	private class MyIterator // TODO: implements ...
+	}
+		
+	private class MyIterator implements Iterator<Part>// TODO: implements ...
+
 	{
 		int cur, next; // must be a valid index or size
 		int colVersion;
 		String function;
 			
 		private boolean wellFormed() {
-			// TODO
-			return true;
+			
+			// 1. the outer invariant using the syntax
+		    if (!ArrayPartCollection.this.wellFormed()) {
+		        return false;
+		    }
+		    
+		    // 2. If version doesn’t match, return true without further checks
+		    if (colVersion != ArrayPartCollection.this.version) {
+		        return true;
+		    }
+		    
+		    // 3. The cur and next fields are valid indices or equal to the size.
+		    if (cur < 0 || cur > ArrayPartCollection.this.size || next < 0 || next > ArrayPartCollection.this.size) {
+		        return report("cur or next fields do not verify");
+		    }
+		    
+		    // 4. Check if iterator is working with a specific function
+		    // the cur and next fields must each refer to a part of that function
+		    if (function != null) {
+		        if ((!functions[cur].equals(function)) || ((!functions[next].equals(function)))) {
+		            return report("cur and next fields must\r\n"
+		            		+ "each refer to a part of that function");
+		        }
+		    }
+		    
+		    // 5. Check if cur index is the same as or the closest legal index before next
+		    if (cur != next && (cur + 1 != next || cur >= ArrayPartCollection.this.size)) {
+		        return report("cur index must be the same as or the closest legal index before next");
+		    }
+		    
+		    return true;
 		}
 			
 		MyIterator(boolean ignored) {} // do not change this constructor
@@ -90,6 +263,18 @@ public class ArrayPartCollection // TODO: extends ... implements ...
 			// TODO: initialize fields
 			// (We use a helper method)
 			assert wellFormed() : "iterator constructor didn't satisfy invariant";
+		}
+
+		@Override
+		public boolean hasNext() {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public Part next() {
+			// TODO Auto-generated method stub
+			return null;
 		}
 			
 		// TODO: Body of iterator class
