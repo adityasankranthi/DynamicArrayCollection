@@ -45,7 +45,6 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
                 return report("Data at index " + i + " is null");
             }
         }
-        
 		return true;
 	}
 	
@@ -97,7 +96,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	@Override // required
 	public boolean addPart(String function, Part part) {
         if (function == null || part == null) throw new NullPointerException("Function and part cannot be null");
-        for (int i = 0; i < parts.length; i++) {
+        for (int i = 0; i < size; i++) {
             if (parts[i] == null) {
                 functions[i] = function;
                 parts[i] = part;
@@ -112,7 +111,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		// TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in getPart";
 		if (index < 0) throw new IllegalArgumentException("Index can not be negative");
-		for (int i = 0; i <functions.length; ++i) {
+		for (int i = 0; i <size; ++i) {
 			if (parts[i] == null) continue;
 			if (function == null || function.equals(functions[i])) {
 				if (index == 0) return parts[i];
@@ -127,7 +126,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	public Part removePart(String function) {
 		// TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in removePart";
-		for (int i = 0; i< functions.length; ++i) {
+		for (int i = 0; i< size; ++i) {
 			if (parts[i] == null) continue;
 			if (function == null || function.equals(functions[i])) {
 				Part p = parts[i];
@@ -206,9 +205,9 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		    // 4. Check if iterator is working with a specific function
 		    // the cur and next fields must each refer to a part of that function
 		    if (function != null) {
-		        if ((!functions[cur].equals(function)) || ((!functions[next].equals(function)))) {
-		            return report("cur and next fields must\r\n"
-		            		+ "each refer to a part of that function");
+		        if ((functions[cur] == null || !functions[cur].equals(function)) ||
+		            (functions[next] == null || !functions[next].equals(function))) {
+		            return report("cur and next fields must each refer to a part of that function");
 		        }
 		    }
 		    
