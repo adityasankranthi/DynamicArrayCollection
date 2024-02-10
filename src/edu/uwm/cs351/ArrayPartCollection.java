@@ -205,39 +205,62 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		    // 4. Check if iterator is working with a specific function
 		    // the cur and next fields must each refer to a part of that function
 		    if (function != null) {
-		        if ((functions[cur] == null || !functions[cur].equals(function)) ||
-		            (functions[next] == null || !functions[next].equals(function))) {
-		            return report("cur and next fields must each refer to a part of that function");
-		        }
-		    }
+	            if ((cur < ArrayPartCollection.this.size && !function.equals(functions[cur])) || (next < ArrayPartCollection.this.size && !function.equals(functions[next])))
+	            	return report("cur and next fields must each refer to a part of that function");
+	        }
 		    
 		    // 5. Check if cur index is the same as or the closest legal index before next
-		    if (cur != next && (cur + 1 != next || cur >= ArrayPartCollection.this.size)) {
-		        return report("cur index must be the same as or the closest legal index before next");
+	    	int index = -1;
+	    	if (function == null) {
+	    		for (int i = cur+1; i< size; i++) {
+	    			if (functions[i] != null) {
+	    				index = i;
+	    				break;
+	    			}
+	    		}
+	    	}
+	    	else {
+	    		for (int i = cur+1; i< size; i++) {
+	    			if (function.equals(functions[i])) {
+	    				index = i;
+	    				break;
+	    			}
+	    		}
+	    	}
+		    if (cur != next && cur + 1 != next && index != next) {
+		    	return report("cur index must be the same as or the closest legal index before next");
 		    }
-		    
 		    return true;
 		}
-			
+
 		MyIterator(boolean ignored) {} // do not change this constructor
 			
-
 		MyIterator(String func) {
-			// TODO: initialize fields
-			// (We use a helper method)
-			assert wellFormed() : "iterator constructor didn't satisfy invariant";
-		}
-
+			this.function = func;
+	        this.cur = 0; // Assuming initial state is at the beginning
+	        this.next = 0; // Assuming initial state is at the beginning
+	        this.colVersion = ArrayPartCollection.this.version;
+	        assert wellFormed() : "iterator constructor didn't satisfy invariant";
+	    }
+		
 		@Override
 		public boolean hasNext() {
 			// TODO Auto-generated method stub
-			return false;
+			return next < size;
 		}
 
 		@Override
 		public Part next() {
 			// TODO Auto-generated method stub
-			return null;
+			if (!hasNext()) {
+	            throw new NoSuchElementException();
+	        }
+
+	        // Move to the next index and return the corresponding element
+	        cur = next;
+	        next++;
+
+	        return parts[cur];
 		}
 			
 		// TODO: Body of iterator class
