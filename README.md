@@ -8,19 +8,21 @@ This is a homework assignment at University of Wisconsin-Milwaukee.
 ### Focus
 
 #### What is this homework assignment about?
-
+The assignment is about implementing an interface, implementing a collection class etc.
 ### Gather
 
 #### What do I know?  What do I need to know that's new?
-
+I need to gain knowledge about collection ADT and the use of iterators to implement them in the homework
 ### Brainstorm
 
 #### What are some ideas for solving this homework assignment?
+following the 'What you need to' do might be a good start, writing well formed would give me an idea of how the data structure/iterator is working 
 
 ### Plan
 
 #### What will I work on first after I finish this planning part?
-
+I would work with learning and getting myself familiar with collection ADT. 
+Then implement wellformed, then robot class's methods, and then finally with collection ADT. 
 
 *The preceding steps should be completed and committed by the
 Friday 10pm deadline.*

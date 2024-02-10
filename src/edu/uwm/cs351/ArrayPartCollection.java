@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-public class ArrayPartCollection implements Robot, Collection<Part>// TODO: extends ... implements ...
+public class ArrayPartCollection extends AbstractCollection<Part> implements Robot// TODO: extends ... implements ...
 
 { 
 	private static final int DEFAULT_INITIAL_CAPACITY = 1;
@@ -47,8 +47,6 @@ public class ArrayPartCollection implements Robot, Collection<Part>// TODO: exte
         }
         
 		return true;
-		
-		
 	}
 	
 	/**
@@ -85,6 +83,7 @@ public class ArrayPartCollection implements Robot, Collection<Part>// TODO: exte
 	 * @param cap initial capacity, must not be negative
 	 */
 	public ArrayPartCollection(int cap){
+		if (cap < 0) throw new IllegalArgumentException("Capacity can't be negative");
 		functions = new String[cap];
 		parts = new Part[cap];
 		assert wellFormed(): "invariant broken by constructor";
@@ -96,22 +95,51 @@ public class ArrayPartCollection implements Robot, Collection<Part>// TODO: exte
 	// to Homework #2, especially if you re-type it yourself!
 	
 	@Override // required
-	public boolean addPart(String arg0, Part arg1) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public boolean addPart(String function, Part part) {
+        if (function == null || part == null) throw new NullPointerException("Function and part cannot be null");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i] == null) {
+                functions[i] = function;
+                parts[i] = part;
+                return true;
+            }
+        }
+        return false;
+    }
 
 	@Override // required
-	public Part getPart(String arg0, int arg1) {
+	public Part getPart(String function, int index) {
 		// TODO Auto-generated method stub
+        assert wellFormed() : "invariant broken in getPart";
+		if (index < 0) throw new IllegalArgumentException("Index can not be negative");
+		for (int i = 0; i <functions.length; ++i) {
+			if (parts[i] == null) continue;
+			if (function == null || function.equals(functions[i])) {
+				if (index == 0) return parts[i];
+				-- index;
+			}
+		}
+        assert wellFormed() : "invariant broken by getPart";
 		return null;
 	}
 
 	@Override // required
-	public Part removePart(String arg0) {
+	public Part removePart(String function) {
 		// TODO Auto-generated method stub
+        assert wellFormed() : "invariant broken in removePart";
+		for (int i = 0; i< functions.length; ++i) {
+			if (parts[i] == null) continue;
+			if (function == null || function.equals(functions[i])) {
+				Part p = parts[i];
+				functions[i] = null;
+				parts[i] = null;
+				return p;
+			}
+		}
+        assert wellFormed() : "invariant broken by removePart";
 		return null;
 	}
+	
     @Override // decorate
     public ArrayPartCollection clone() {
         assert wellFormed() : "invariant broken in clone";
@@ -133,88 +161,24 @@ public class ArrayPartCollection implements Robot, Collection<Part>// TODO: exte
         assert wellFormed() : "invariant broken by clone";
         return result;
     }
+    
+	@Override
+	public Iterator<Part> iterator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	public Iterator<Part> iterator(String string) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public int size() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	@Override // required
-	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public boolean contains(Object o) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public Iterator<Part> iterator() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override // required
-	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override // required
-	public <T> T[] toArray(T[] a) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override // required
-	public boolean add(Part e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public boolean remove(Object o) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public boolean containsAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public boolean addAll(Collection<? extends Part> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public boolean removeAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public boolean retainAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override // required
-	public void clear() {
-		// TODO Auto-generated method stub
-		
-	}
-		
 	private class MyIterator implements Iterator<Part>// TODO: implements ...
 
 	{
