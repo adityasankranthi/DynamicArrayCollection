@@ -95,14 +95,18 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	
 	@Override // required
 	public boolean addPart(String function, Part part) {
+        assert wellFormed() : "invariant broken by addPart";
         if (function == null || part == null) throw new NullPointerException("Function and part cannot be null");
-        for (int i = 0; i < size; i++) {
+        ensureCapacity(ArrayPartCollection.this.size + 1);
+        ArrayPartCollection.this.size++;
+        for (int i = 0; i < ArrayPartCollection.this.size; i++) {
             if (parts[i] == null) {
                 functions[i] = function;
                 parts[i] = part;
                 return true;
             }
         }
+        assert wellFormed() : "invariant broken by addPart";
         return false;
     }
 
@@ -111,7 +115,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		// TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in getPart";
 		if (index < 0) throw new IllegalArgumentException("Index can not be negative");
-		for (int i = 0; i <size; ++i) {
+		for (int i = 0; i <ArrayPartCollection.this.size; ++i) {
 			if (parts[i] == null) continue;
 			if (function == null || function.equals(functions[i])) {
 				if (index == 0) return parts[i];
@@ -126,12 +130,22 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	public Part removePart(String function) {
 		// TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in removePart";
-		for (int i = 0; i< size; ++i) {
+		for (int i = 0; i< ArrayPartCollection.this.size; ++i) {
 			if (parts[i] == null) continue;
 			if (function == null || function.equals(functions[i])) {
 				Part p = parts[i];
-				functions[i] = null;
-				parts[i] = null;
+				// adjust the dynamic array
+				for (int j = i; j < ArrayPartCollection.this.size - 1; j++) {
+		            functions[j] = functions[j + 1];
+		            parts[j] = parts[j + 1];
+		        }
+				// adjust the size;
+				ArrayPartCollection.this.size--;
+				// null the elements after the size for addPart to add 
+				for (int x= size; x < functions.length; x++) {
+					parts[x] = null;
+					functions[x] = null;
+				}
 				return p;
 			}
 		}
@@ -164,6 +178,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	@Override
 	public Iterator<Part> iterator() {
 		// TODO Auto-generated method stub
+		iterator(null);
 		return null;
 	}
 	
@@ -175,6 +190,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	@Override
 	public int size() {
 		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
@@ -212,7 +228,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		    // 5. Check if cur index is the same as or the closest legal index before next
 	    	int index = -1;
 	    	if (function == null) {
-	    		for (int i = cur+1; i< size; i++) {
+	    		for (int i = cur+1; i< ArrayPartCollection.this.size; i++) {
 	    			if (functions[i] != null) {
 	    				index = i;
 	    				break;
@@ -220,7 +236,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	    		}
 	    	}
 	    	else {
-	    		for (int i = cur+1; i< size; i++) {
+	    		for (int i = cur+1; i< ArrayPartCollection.this.size; i++) {
 	    			if (function.equals(functions[i])) {
 	    				index = i;
 	    				break;
@@ -255,11 +271,9 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 			if (!hasNext()) {
 	            throw new NoSuchElementException();
 	        }
-
 	        // Move to the next index and return the corresponding element
 	        cur = next;
 	        next++;
-
 	        return parts[cur];
 		}
 			
