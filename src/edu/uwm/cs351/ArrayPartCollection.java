@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
-public class ArrayPartCollection extends AbstractCollection<Part> implements Robot// TODO: extends ... implements ...
+public class ArrayPartCollection extends AbstractCollection<Part> implements Robot, Cloneable// TODO: extends ... implements ...
 
 { 
 	private static final int DEFAULT_INITIAL_CAPACITY = 1;
@@ -103,6 +103,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
             if (parts[i] == null) {
                 functions[i] = function;
                 parts[i] = part;
+                version++;
                 return true;
             }
         }
@@ -146,6 +147,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 					parts[x] = null;
 					functions[x] = null;
 				}
+				version++;
 				return p;
 			}
 		}
@@ -269,8 +271,8 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	        if (colVersion != ArrayPartCollection.this.version) {
 	            throw new ConcurrentModificationException("Collection was modified during iteration");
 	        }
-	        int i = next+1;
-	        if (next == ArrayPartCollection.this.size) i = 0;
+	        int i = cur+1;
+	        if (cur == ArrayPartCollection.this.size) i = 0;
 	        for (; i < ArrayPartCollection.this.size; ++i) {
 	            if ((function == null && parts[i] != null) || function.equals(functions[i])) {
 	                return true;
@@ -287,17 +289,26 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	            throw new NoSuchElementException();
 	        }
 	        cur = next;
-	        int i = next+1;
-	        if (next == ArrayPartCollection.this.size) i = 0;
+	        int i = cur+1;
+	        if (cur == ArrayPartCollection.this.size) i = 0;
 	        for (; i < ArrayPartCollection.this.size; ++i) {
 	            if ((function == null && parts[i] != null) || function.equals(functions[i])) {
 	                next = i;
 	                break;
 	            }
 	        }
-	        if (cur == ArrayPartCollection.this.size) cur = next;
+	        if (cur == ArrayPartCollection.this.size) {
+	        	cur = next;
+	        	int j = cur+1;
+		        for (; j < ArrayPartCollection.this.size; ++j) {
+		            if ((function == null && parts[j] != null) || function.equals(functions[j])) {
+		                next = j;
+		                break;
+		            }
+		        }
+	        }
 	        assert wellFormed() : "invariant broken by next";
-	        return parts[next];
+	        return parts[cur];
 	    }
 		
 		@Override //required
@@ -313,13 +324,30 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	            parts[i] = parts[i + 1];
 	            functions[i] = functions[i + 1];
 	        }
-	        parts[ArrayPartCollection.this.size - 1] = null;
-	        functions[ArrayPartCollection.this.size - 1] = null;
 	        ArrayPartCollection.this.size--;
+			for (int x= size; x < functions.length; x++) {
+				parts[x] = null;
+				functions[x] = null;
+			}
+			// find last legal index
+			if (size != 0) {
+				int previousIndex = cur -1;
+				cur = size;
+				next = size;
+		        for (; previousIndex >= 0; --previousIndex) {
+		            if ((function == null && parts[previousIndex] != null) || function.equals(functions[previousIndex])) {
+		                break;
+		            }
+		        }
+		        // reset to the last legal index
+		        while (cur != previousIndex && previousIndex >= 0) {
+		        	next();
+		        }
+			}
 	        colVersion++;
+	        version++;
 	        assert wellFormed() : "invariant broken by remove";
 		}
-		
 	}
 		
 	public static class Spy {
