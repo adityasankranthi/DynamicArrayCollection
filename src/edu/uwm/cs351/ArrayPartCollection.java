@@ -174,24 +174,22 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
         assert wellFormed() : "invariant broken by clone";
         return result;
     }
-    
-	@Override
+
+	@Override // required
 	public Iterator<Part> iterator() {
-		// TODO Auto-generated method stub
-		iterator(null);
-		return null;
+		return iterator(null);
 	}
 	
 	public Iterator<Part> iterator(String string) {
-		// TODO Auto-generated method stub
-		return null;
+        assert wellFormed() : "invariant broken in iterator";
+		return new MyIterator(string);
 	}
 
-	@Override
+	@Override // required
 	public int size() {
 		// TODO Auto-generated method stub
-		
-		return 0;
+        assert wellFormed() : "invariant broken in size";
+		return ArrayPartCollection.this.size;
 	}
 
 	private class MyIterator implements Iterator<Part>// TODO: implements ...
@@ -250,34 +248,78 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		}
 
 		MyIterator(boolean ignored) {} // do not change this constructor
+		
+		MyIterator(){
+			this(null);
+		}
 			
 		MyIterator(String func) {
 			this.function = func;
-	        this.cur = 0; // Assuming initial state is at the beginning
-	        this.next = 0; // Assuming initial state is at the beginning
+	        this.cur = ArrayPartCollection.this.size; 
+	        this.next = ArrayPartCollection.this.size;
 	        this.colVersion = ArrayPartCollection.this.version;
-	        assert wellFormed() : "iterator constructor didn't satisfy invariant";
+	        assert wellFormed() : "invariant broken by iterator constructor";
 	    }
-		
-		@Override
-		public boolean hasNext() {
-			// TODO Auto-generated method stub
-			return next < size;
-		}
 
-		@Override
+		// TODO: Body of iterator class
+		@Override // required
+		public boolean hasNext() {
+	        assert wellFormed() : "invariant broken in hasNext";
+
+	        if (colVersion != ArrayPartCollection.this.version) {
+	            throw new ConcurrentModificationException("Collection was modified during iteration");
+	        }
+	        int i = next+1;
+	        if (next == ArrayPartCollection.this.size) i = 0;
+	        for (; i < ArrayPartCollection.this.size; ++i) {
+	            if ((function == null && parts[i] != null) || function.equals(functions[i])) {
+	                return true;
+	            }
+	        }
+	        assert wellFormed() : "invariant broken by hasNext";
+	        return false;
+	    }
+
+		@Override // required
 		public Part next() {
-			// TODO Auto-generated method stub
-			if (!hasNext()) {
+	        assert wellFormed() : "invariant broken in next";
+	        if (!hasNext()) {
 	            throw new NoSuchElementException();
 	        }
-	        // Move to the next index and return the corresponding element
 	        cur = next;
-	        next++;
-	        return parts[cur];
+	        int i = next+1;
+	        if (next == ArrayPartCollection.this.size) i = 0;
+	        for (; i < ArrayPartCollection.this.size; ++i) {
+	            if ((function == null && parts[i] != null) || function.equals(functions[i])) {
+	                next = i;
+	                break;
+	            }
+	        }
+	        if (cur == ArrayPartCollection.this.size) cur = next;
+	        assert wellFormed() : "invariant broken by next";
+	        return parts[next];
+	    }
+		
+		@Override //required
+		public void remove() {
+	        assert wellFormed() : "invariant broken in remove";
+	        if (colVersion != ArrayPartCollection.this.version) {
+	            throw new ConcurrentModificationException("Collection was modified during iteration");
+	        }
+	        if (cur == ArrayPartCollection.this.size) {
+	            throw new IllegalStateException("No element to remove");
+	        }
+	        for (int i = cur; i < ArrayPartCollection.this.size - 1; ++i) {
+	            parts[i] = parts[i + 1];
+	            functions[i] = functions[i + 1];
+	        }
+	        parts[ArrayPartCollection.this.size - 1] = null;
+	        functions[ArrayPartCollection.this.size - 1] = null;
+	        ArrayPartCollection.this.size--;
+	        colVersion++;
+	        assert wellFormed() : "invariant broken by remove";
 		}
-			
-		// TODO: Body of iterator class
+		
 	}
 		
 	public static class Spy {
