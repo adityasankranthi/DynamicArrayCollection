@@ -116,7 +116,6 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
      */
     @Override // required
     public Part getPart(String function, int index) {
-        // TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in getPart";
         if (index < 0) throw new IllegalArgumentException("Index can not be negative");
         for (int i = 0; i < ArrayPartCollection.this.size; ++i) {
@@ -138,7 +137,6 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
      */
     @Override // required
     public Part removePart(String function) {
-        // TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in removePart";
         for (int i = 0; i < ArrayPartCollection.this.size; ++i) {
             if (parts[i] == null) continue;
@@ -215,12 +213,11 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
      */
     @Override // required
     public int size() {
-        // TODO Auto-generated method stub
         assert wellFormed() : "invariant broken in size";
         return ArrayPartCollection.this.size;
     }
 
-    private class MyIterator implements Iterator<Part>// TODO: implements ...
+    private class MyIterator implements Iterator<Part>
     {
         int cur, next; // must be a valid index or size
         int colVersion;
@@ -446,7 +443,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
          * Creates a testing instance of an iterator
          *
          * @param outer the ArrayListRobot attached to the iterator
-         * @param f     TODO
+         * @param f     function to be checked
          * @param i     the starting index
          * @param n     the remaining value, how many elements are left
          * @param cv    the colVersion
