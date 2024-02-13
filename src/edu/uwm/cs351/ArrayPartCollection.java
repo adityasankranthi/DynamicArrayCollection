@@ -96,20 +96,15 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
      */
     @Override // required
     public boolean addPart(String function, Part part) {
-        assert wellFormed() : "invariant broken by addPart";
+        assert wellFormed() : "invariant broken in addPart";
         if (function == null || part == null) throw new NullPointerException("Function and part cannot be null");
         ensureCapacity(ArrayPartCollection.this.size + 1);
+        functions[size] = function;
+        parts[size] = part;
         ArrayPartCollection.this.size++;
-        for (int i = 0; i < ArrayPartCollection.this.size; i++) {
-            if (parts[i] == null) {
-                functions[i] = function;
-                parts[i] = part;
-                version++;
-                return true;
-            }
-        }
+        version++;
         assert wellFormed() : "invariant broken by addPart";
-        return false;
+        return true;
     }
 
     /**
@@ -154,13 +149,11 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
                     functions[j] = functions[j + 1];
                     parts[j] = parts[j + 1];
                 }
+                parts[size - 1] = null;
+                functions[size - 1] = null;
                 // adjust the size;
                 ArrayPartCollection.this.size--;
                 // null the elements after the size for addPart to add
-                for (int x = size; x < functions.length; x++) {
-                    parts[x] = null;
-                    functions[x] = null;
-                }
                 version++;
                 return p;
             }
