@@ -226,7 +226,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	        }
 		    
 		    // 5. Check if cur index is the same as or the closest legal index before next
-	    	int index = -1;
+	    	int index = size;
 	    	if (function == null) {
 	    		for (int i = cur+1; i< ArrayPartCollection.this.size; i++) {
 	    			if (functions[i] != null) {
@@ -288,65 +288,76 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	        if (!hasNext()) {
 	            throw new NoSuchElementException();
 	        }
+	        boolean nextFound = false;
 	        cur = next;
 	        int i = cur+1;
 	        if (cur == ArrayPartCollection.this.size) i = 0;
 	        for (; i < ArrayPartCollection.this.size; ++i) {
 	            if ((function == null && parts[i] != null) || function.equals(functions[i])) {
 	                next = i;
+	                nextFound = true;
 	                break;
 	            }
 	        }
 	        if (cur == ArrayPartCollection.this.size) {
+	        	nextFound = false;
 	        	cur = next;
 	        	int j = cur+1;
 		        for (; j < ArrayPartCollection.this.size; ++j) {
 		            if ((function == null && parts[j] != null) || function.equals(functions[j])) {
 		                next = j;
+		                nextFound = true;
 		                break;
 		            }
 		        }
 	        }
+	        if (!nextFound) next = size;
 	        assert wellFormed() : "invariant broken by next";
 	        return parts[cur];
 	    }
 		
-		@Override //required
+		@Override
 		public void remove() {
-	        assert wellFormed() : "invariant broken in remove";
-	        if (colVersion != ArrayPartCollection.this.version) {
-	            throw new ConcurrentModificationException("Collection was modified during iteration");
+		    assert wellFormed() : "invariant broken in remove";
+		    if (colVersion != ArrayPartCollection.this.version) {
+		        throw new ConcurrentModificationException("Collection was modified during iteration");
+		    }
+		    if (cur == ArrayPartCollection.this.size) {
+		        throw new IllegalStateException("No element to remove");
+		    }
+		    
+		    // Adjust the dynamic array
+		    for (int i = cur; i < ArrayPartCollection.this.size - 1; ++i) {
+		        parts[i] = parts[i + 1];
+		        functions[i] = functions[i + 1];
+		    }
+			parts[size - 1] = null;
+			functions[size - 1] = null;
+		    ArrayPartCollection.this.size--;
+		    
+		    // Find last legal index
+		    int previousIndex = cur - 1;
+		    cur = size;
+		    next = size;
+		    for (; previousIndex >= 0; --previousIndex) {
+	            if ((function == null && parts[previousIndex] != null) || function.equals(functions[previousIndex])) {
+	                break;
+	            }
 	        }
-	        if (cur == ArrayPartCollection.this.size) {
-	            throw new IllegalStateException("No element to remove");
-	        }
-	        for (int i = cur; i < ArrayPartCollection.this.size - 1; ++i) {
-	            parts[i] = parts[i + 1];
-	            functions[i] = functions[i + 1];
-	        }
-	        ArrayPartCollection.this.size--;
-			for (int x= size; x < functions.length; x++) {
-				parts[x] = null;
-				functions[x] = null;
-			}
-			// find last legal index
-			if (size != 0) {
-				int previousIndex = cur -1;
-				cur = size;
-				next = size;
-		        for (; previousIndex >= 0; --previousIndex) {
-		            if ((function == null && parts[previousIndex] != null) || function.equals(functions[previousIndex])) {
-		                break;
-		            }
-		        }
-		        // reset to the last legal index
-		        while (cur != previousIndex && previousIndex >= 0) {
-		        	next();
-		        }
-			}
-	        colVersion++;
-	        version++;
-	        assert wellFormed() : "invariant broken by remove";
+		    // Reset to the last legal index
+		    if (cur != previousIndex && previousIndex >= 0) {
+		        cur = previousIndex;
+		    } 
+		    for (int i = cur+1; i< size; i++) {
+		    	if ((function == null && parts[i] != null) || function.equals(functions[i])) {
+	                next = i;
+		    		break;
+	            }
+		    }
+		    
+		    colVersion++;
+		    version++;
+		    assert wellFormed() : "invariant broken by remove";
 		}
 	}
 		
@@ -423,4 +434,3 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 }
 	
 	
-
