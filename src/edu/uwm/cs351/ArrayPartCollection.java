@@ -200,6 +200,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		int cur, next; // must be a valid index or size
 		int colVersion;
 		String function;
+		boolean nextCalled;
 			
 		private boolean wellFormed() {
 			
@@ -260,6 +261,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	        this.cur = ArrayPartCollection.this.size; 
 	        this.next = ArrayPartCollection.this.size;
 	        this.colVersion = ArrayPartCollection.this.version;
+	        this.nextCalled = false;
 	        assert wellFormed() : "invariant broken by iterator constructor";
 	    }
 
@@ -288,6 +290,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 	        if (!hasNext()) {
 	            throw new NoSuchElementException();
 	        }
+	        nextCalled = true;
 	        boolean nextFound = false;
 	        cur = next;
 	        int i = cur+1;
@@ -322,7 +325,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		    if (colVersion != ArrayPartCollection.this.version) {
 		        throw new ConcurrentModificationException("Collection was modified during iteration");
 		    }
-		    if (cur == ArrayPartCollection.this.size) {
+		    if (!nextCalled) {
 		        throw new IllegalStateException("No element to remove");
 		    }
 		    
@@ -357,6 +360,7 @@ public class ArrayPartCollection extends AbstractCollection<Part> implements Rob
 		    
 		    colVersion++;
 		    version++;
+		    nextCalled = false;
 		    assert wellFormed() : "invariant broken by remove";
 		}
 	}
