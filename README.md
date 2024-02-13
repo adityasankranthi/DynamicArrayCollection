@@ -32,14 +32,18 @@ Friday 10pm deadline.*
 ### Review
 
 #### Did I correctly anticipate the difficulties?
+Yes, I was able to anticipate the most of the difficulties correctly, in the beginning I was confused if I had to use iterator to implement Robot methods but then I saw a piazza post clarifying the same.
 
 #### How did the plan go?
+The plan went fine, but this homework also has efficiency testing so I should have took care of that earlier now that I have already developed an algorithms I am finding it difficult to optimize it.
 
 ### Preview
 
 #### What should I do differently for next week's homework assignment?
+I should keep in mind efficiency in mind while coding from next time. 
 
 #### Do I need more resources?
+Oracle's online resources have helped me along with piazza, most my questions were already answered by previous queries on piazza.
 
 ## Optional Feedback
 
